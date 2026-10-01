@@ -14,6 +14,7 @@ import { resolveCursorModels } from "open-sse/services/cursorModels.js";
 import { resolveZedModels } from "open-sse/shared/zedAuth.js";
 import { resolveClineModels, resolveClinepassModels } from "open-sse/services/clinepassModels.js";
 import codexProvider from "open-sse/providers/registry/codex.js";
+import { NOUS_MODELS_URL, normalizeNousModels } from "open-sse/services/nous.js";
 
 const GEMINI_CLI_MODELS_URL = "https://cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels";
 
@@ -248,6 +249,28 @@ const PROVIDER_MODELS_CONFIG = {
   },
   openai: createOpenAIModelsConfig("https://api.openai.com/v1/models"),
   openrouter: createOpenAIModelsConfig("https://openrouter.ai/api/v1/models"),
+  nous: {
+    customResolver: async (connection) => {
+      try {
+        const response = await fetch(NOUS_MODELS_URL, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${connection.apiKey}`,
+          },
+        });
+        if (!response.ok) {
+          return { models: [], warning: `Nous Portal model discovery failed: ${response.status}` };
+        }
+        const models = normalizeNousModels(await response.json());
+        return models.length
+          ? { models }
+          : { models: [], warning: "Nous Portal returned no chat-capable models." };
+      } catch (error) {
+        return { models: [], warning: `Nous Portal model discovery failed: ${error.message}` };
+      }
+    },
+  },
   anthropic: {
     url: "https://api.anthropic.com/v1/models",
     method: "GET",

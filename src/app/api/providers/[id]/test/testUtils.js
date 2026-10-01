@@ -4,6 +4,7 @@ import { testProxyUrl } from "@/lib/network/proxyTest";
 import { isOpenAICompatibleProvider, isAnthropicCompatibleProvider } from "@/shared/constants/providers";
 import { getDefaultModel } from "open-sse/config/providerModels.js";
 import { resolveOllamaLocalHost, PROVIDERS } from "open-sse/config/providers.js";
+import { createNousApiKeyProbe, classifyNousApiKeyProbe } from "open-sse/services/nous.js";
 import { CODEX_CLI_VERSION } from "open-sse/config/appConstants.js";
 import { GROK_CLI_PAGER_USER_AGENT, GROK_CLI_VERSION } from "open-sse/config/grokCli.js";
 import {
@@ -539,6 +540,14 @@ async function testApiKeyConnection(connection, effectiveProxy = null) {
 
   try {
     switch (connection.provider) {
+      case "nous": {
+        const probe = createNousApiKeyProbe(connection.apiKey);
+        const res = await fetchWithConnectionProxy(probe.url, {
+          ...probe.options,
+          signal: AbortSignal.timeout(8000),
+        }, effectiveProxy);
+        return classifyNousApiKeyProbe(res.status);
+      }
       case "cloudflare-ai": {
         const psd = connection.providerSpecificData || {};
         const accountId = psd.accountId;

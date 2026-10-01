@@ -279,6 +279,15 @@ export const PROVIDER_CAPABILITIES = {
     "laguna-s-2.1":  { reasoning: true, thinkingFormat: "openai", contextWindow: 1000000, maxOutput: 32000 },
     "laguna-xs-2.1": { reasoning: true, thinkingFormat: "openai", contextWindow: 200000, maxOutput: 32000 },
   },
+  // The documented Hermes 4 Portal offerings use ordinary OpenAI-compatible
+  // reasoning_effort translation. Tools retain the generic OpenAI default: the
+  // docs discourage rapid tool loops but do not establish an API prohibition.
+  "nous": {
+    "nousresearch/hermes-4-70b": { reasoning: true, thinkingFormat: "openai" },
+    "nousresearch/hermes-4-405b": { reasoning: true, thinkingFormat: "openai" },
+    "hermes-4-70b": { reasoning: true, thinkingFormat: "openai" },
+    "hermes-4-405b": { reasoning: true, thinkingFormat: "openai" },
+  },
   // Ollama Cloud — the generic *deepseek-v4* pattern misses the vision badge
   // the library page publishes for this model (text+image in, 1M context).
   // ponytail: thinkingFormat stays "deepseek" to preserve today's body shape;
